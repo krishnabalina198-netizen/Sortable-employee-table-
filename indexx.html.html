@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sortable Employee Table</title>
+<style>
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+    cursor: pointer;
+    user-select: none;
+  }
+  tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  tbody tr:hover {
+    background-color: #e6f7ff;
+  }
+  th.sorted-asc::after {
+    content: " ▲";
+  }
+  th.sorted-desc::after {
+    content: " ▼";
+  }
+</style>
+</head>
+<body>
+
+<table id="employeeTable">
+  <thead>
+    <tr>
+      <th data-key="name">Name</th>
+      <th data-key="department">Department</th>
+      <th data-key="salary">Salary</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+  const employees = [
+    { name: "Alice Johnson", department: "Engineering", salary: 90000 },
+    { name: "Bob Smith", department: "Marketing", salary: 75000 },
+    { name: "Charlie Davis", department: "Sales", salary: 80000 },
+    { name: "Diana King", department: "HR", salary: 70000 },
+    { name: "Evan Lee", department: "Engineering", salary: 95000 },
+  ];
+
+  const tbody = document.querySelector("#employeeTable tbody");
+  const headers = document.querySelectorAll("#employeeTable th");
+
+  let sortKey = null;
+  let sortDirection = 'asc';
+
+  function renderTable(data) {
+    tbody.innerHTML = "";
+    data.forEach(({ name, department, salary }) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${name}</td>
+        <td>${department}</td>
+        <td>$${salary.toLocaleString()}</td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  function clearSortIndicators() {
+    headers.forEach(header => {
+      header.classList.remove("sorted-asc", "sorted-desc");
+    });
+  }
+
+  function sortTable(key) {
+    if (sortKey === key) {
+      sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortKey = key;
+      sortDirection = 'asc';
+    }
+
+    employees.sort((a, b) => {
+      if (a[key] < b[key]) return sortDirection === 'asc' ? -1 : 1;
+      if (a[key] > b[key]) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    clearSortIndicators();
+    document.querySelector(`th[data-key="${key}"]`).classList.add(
+      sortDirection === 'asc' ? "sorted-asc" : "sorted-desc"
+    );
+
+    renderTable(employees);
+  }
+
+  headers.forEach(header => {
+    header.addEventListener("click", () => sortTable(header.dataset.key));
+  });
+
+  // Initial table render
+  renderTable(employees);
+</script>
+
+</body>
+</html>
